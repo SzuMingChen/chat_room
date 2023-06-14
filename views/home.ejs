@@ -7,20 +7,20 @@
     <title>登入首頁</title>
 </head>
 <body>
-    <h1>首頁</h1>
+    <h1><%= title %></h1>
     <form id="loginForm" action="/login" method="post" >
-      <label for="loginUsername">帳號:</label>
-      <input type="text" id="loginUsername" name="username" required>
+      <label for="user_account">帳號:</label>
+      <input type="text" id="user_account" name="user_account" required>
       <br>
-      <label for="loginPassword">密碼:</label>
-      <input type="password" id="loginPassword" name="password" required>
+      <label for="password">密碼:</label>
+      <input type="password" id="password" name="password" required>
       <br>
       <button type="submit">登入</button>
     </form>
-    <form action="">
+    <form action="/api/register" method="get">
         <button type="submit">註冊</button>
     </form>
-    <form action="">
+    <form action="/api/forgot" method="get">
         <button type="submit">忘記密碼</button>
     </form>
 </body>

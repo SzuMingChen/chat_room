@@ -7,13 +7,19 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const server = require('http').createServer(app);
 const cors = require('cors');
-const { clog } = require('./utils');
+const { clog } = require('./config/utils');
+const router = require('./router/router');
 const port = 3000;
+
+//* 啟動ejs
+const engine = require("ejs-locals");
+app.engine("ejs", engine);
+app.set("views", "./views");
+app.set("view engine", "ejs");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-
 
 const io = require("socket.io")(server, {
   cors: {
@@ -43,23 +49,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// router
-app.get('/', (req, res) => {
-  clog('首頁的session');
-  console.log(req.session);
-  res.sendFile(__dirname + '/views/home.html');
-});
-
+// 登入聊天室
 app.post('/login', (req, res) => {
+  // 在登入成功後，將使用者資料存儲到 Session 中
+  const user_account = req.body.user_account;
+  req.session.user = { user_account: user_account };
   req.session.info.logined = true;
   if (req.session.info.logined === false) {
-    res.sendFile(__dirname + '/views/home.html');
+    res.render('home');
   } else {
     req.session.info.logined = true;
     clog('登入中');
     console.log(req.session);
-   
-    //
+
+    // io 連接伺服器
     io.on('connection', (socket) => {
       clog('用戶已連接!');
 
@@ -75,17 +78,14 @@ app.post('/login', (req, res) => {
       });
     });
   }
-  res.sendFile(__dirname + '/views/chat.html');
+  res.render('chat');
 });
 
-app.get('/logout', (req, res) => {
-  req.session.destroy();
-  console.log(req.session);
-  res.send('您成功登出');
-});
 
+// router
+app.use('/api', router)
 
 
 server.listen(port, () => {
-  console.log(`伺服器運行::http://localhost:${port}/`);
+  console.log(`伺服器運行::http://localhost:${port}/api/home`);
 });

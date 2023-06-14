@@ -12,9 +12,13 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^4.18.2",
+    "dotenv": "^16.1.4",
+    "ejs": "^3.1.9",
+    "ejs-locals": "^1.0.2",
+    "express": "^5.0.0-alpha.2",
     "express-session": "^1.17.3",
     "ip": "^1.1.8",
+    "mysql2": "^3.3.5",
     "session": "^0.1.0",
     "socket.io": "^4.6.2"
   }

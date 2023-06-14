@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>註冊</title>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <form action="/api/create" method="post">
+        <label for="nick_name">暱稱:</label>
+        <input type="text" id="nick_name" name="nick_name" required>
+        <br>
+        <label for="user_account">帳號:</label>
+        <input type="text" id="user_account" name="user_account" required>
+        <br>
+        <label for="password">密碼:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <label for="check_password">確認密碼:</label>
+        <input type="password" id="check_password" name="check_password" required>
+        <br>
+        <button type="submit">註冊</button>
+    </form>
+    <form action="/api/home" method="get">
+        <button type="submit">回首頁</button>
+    </form>
+</body>
+</html>
