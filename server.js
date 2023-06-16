@@ -21,6 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
+// socket io
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",//! 允許來源，也可以為網域 "*"為允許所有來源 
@@ -29,6 +30,10 @@ const io = require("socket.io")(server, {
   }
 });
 
+// 引入socket.js文件 並啟動
+const socket = require('./socket.io/socket.io')(io);
+
+// session
 app.use(session({
   secret: 'your_secret_key', //! 用於簽署和加密 Session 的 Cookie，請將其替換為你自己的密鑰。
   resave: false, //! 設置是否在每次請求時強制重新保存 Session，設為 false 表示僅在 Session 有更改時才保存。
@@ -49,43 +54,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// 登入聊天室
-app.post('/login', (req, res) => {
-  // 在登入成功後，將使用者資料存儲到 Session 中
-  const user_account = req.body.user_account;
-  req.session.user = { user_account: user_account };
-  req.session.info.logined = true;
-  if (req.session.info.logined === false) {
-    res.render('home');
-  } else {
-    req.session.info.logined = true;
-    clog('登入中');
-    console.log(req.session);
-
-    // io 連接伺服器
-    io.on('connection', (socket) => {
-      clog('用戶已連接!');
-
-      // 發送聊天訊息事件
-      socket.on('chat message', (message) => {
-        clog('收到訊息:' + message);
-        io.emit('chat message', message); // 廣播訊息給所有客戶端
-      });
-
-      // 當客戶端斷開連接時
-      socket.on('disconnect', () => {
-        clog('用戶連接中斷!');
-      });
-    });
-  }
-  res.render('chat');
-});
-
-
 // router
 app.use('/api', router)
 
 
 server.listen(port, () => {
-  console.log(`伺服器運行::http://localhost:${port}/api/home`);
+  clog(`伺服器運行::http://localhost:${port}/api/home`);
 });

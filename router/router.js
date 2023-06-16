@@ -8,10 +8,9 @@ const page = require('./page');
 module.exports =
 
 //* user_account
-// router.post("/login", user_ctrl.login_account);
+router.post("/login", user_ctrl.login_account);
 router.post("/create", user_ctrl.create_account);
 // router.post("/edit", user_ctrl.edit_account);
-// router.get("/logout", user_ctrl.logout_account); 
 
 //* chart_room
 // router.get("/todo_list", list_ctrl.home);

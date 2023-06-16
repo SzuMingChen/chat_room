@@ -3,27 +3,35 @@ const crypto = require("crypto");
 
 //! 登入
 exports.login_account = async (req, res) => {
-  console.log('----進ctrl---->', req.body);
+  // 在登入成功後，將使用者資料存儲到 Session 中
   const { user_account, password } = req.body;
-  //* 加密
-  const hash = crypto.createHash("md5");
-  const password_ans = hash.update(password).digest("hex");
-  //* 查找現有帳號確認有無註冊 
-  const [check_account] = await user_model.check_account(user_account);
-  console.log('----ctrl回---->', check_account);
-  if (!check_account) return res.render("login", { title: '帳號密碼輸入錯誤!!' });
-  //* 判斷密碼有無輸入錯誤
-  if (check_account.password !== password_ans) return res.render("login", { title: '帳號密碼輸入錯誤!!' });
-
-  //todo 在登入成功後，將使用者資料存儲到 Session 中
-  req.session.user = { user_account: check_account.user_account, name: check_account.name };
+  req.session.info.logined = true;
+  if (req.session.info.logined === false) {
+    res.render("home", { title: '不明原因導致登入失敗!!' });
+  } else {
+    req.session.info.logined = true;
+    console.log('登入成功!!!');
+    console.log(req.session);
+    //* 加密
+    const hash = crypto.createHash("md5");
+    const password_ans = hash.update(password).digest("hex");
+    //* 查找現有帳號確認有無註冊 
+    const [check_account] = await user_model.check_account(user_account);
+    console.log('----ctrl回---->', check_account);
+    if (!check_account) return res.render("home", { title: '帳號密碼輸入錯誤!!' });
+    //* 判斷密碼有無輸入錯誤
+    if (check_account.password !== password_ans) return res.render("home", { title: '帳號密碼輸入錯誤!!' });
+    //! 在登入成功後，將使用者資料存儲到 Session 中
+    req.session.user = { user_account: check_account.user_account, name: check_account.name };
+    console.log('name!!!!!!', req.session);
+  }
 
   if (req.session.user) {
     //* 成功就跳轉至todo_list頁面
-    return res.redirect('/api/todo_list');
+    return res.render('chat');
   } else {
     //* 登入失敗，跳回主頁
-    return res.redirect('/api/home');
+    return res.render("home", { title: '不明原因導致登入失敗!!' });
   }
 };
 
@@ -90,19 +98,6 @@ exports.edit_account = async (req, res) => {
   return res.render("login", { title: '更新成功!! 請直接登入' });
 };
 
-//! 登出
-exports.logout_account = async (req, res) => {
-
-  // 清除數據
-  req.session.destroy(err => {
-    if (err) {
-      console.log('session 清除失敗:', err);
-    } else {
-      res.redirect('/api/home');
-    }
-  });
-
-};
 
 
 
