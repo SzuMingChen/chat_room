@@ -7,11 +7,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>聊天室</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
         #chat {
             height: 300px;
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #messageInput {
+            width: 70%;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        #sendButton {
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+
+        form {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -22,6 +51,9 @@
     <input type="text" id="messageInput" placeholder="輸入訊息">
     <button id="sendButton">Send</button>
 
+    <form action="/api/info" method="post">
+        <button type="submit">個人資訊</button>
+    </form>
     <form action="/api/logout" method="get">
         <button type="submit">登出</button>
     </form>
@@ -33,6 +65,9 @@
     // 連接至 Socket.IO 伺服器 全域使用
     const socket = io();
 
+    // 使用者資訊
+    const userInfo = '<%= user_info %>';
+
     // 取得元素
     const chatDiv = document.getElementById('chat');
     const messageInput = document.getElementById('messageInput');
@@ -40,7 +75,8 @@
 
     // 發送訊息
     function sendMessage() {
-        const message = messageInput.value;
+        const message = `${userInfo}：${messageInput.value}` ;
+
         if (message) {
             socket.emit('chat message', message); // 發送 'chat message' 事件到伺服器
             messageInput.value = ''; // 清空輸入框

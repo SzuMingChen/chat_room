@@ -10,7 +10,7 @@ const io = require("socket.io")(server, {
     }
 });
 
-// 包成fn引出
+
 module.exports = function (io) {
     //! 須拆出來到獨立區域才不會有重複綁定的問題，因為原本都請求再同一個路由
     // io 連接伺服器
@@ -19,7 +19,7 @@ module.exports = function (io) {
 
         // 取得當前連線的人數
         const connectedClients = io.sockets.server.engine.clientsCount;
-        clog('目前連線人數:' + connectedClients);
+        console.log('目前連線人數:', connectedClients);
 
         // 發送聊天訊息事件
         socket.on('chat message', (message) => {

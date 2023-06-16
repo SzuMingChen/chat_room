@@ -10,7 +10,8 @@ module.exports =
 //* user_account
 router.post("/login", user_ctrl.login_account);
 router.post("/create", user_ctrl.create_account);
-// router.post("/edit", user_ctrl.edit_account);
+router.post('/password', user_ctrl.set_password)
+router.post("/edit", user_ctrl.edit_account);
 
 //* chart_room
 // router.get("/todo_list", list_ctrl.home);
@@ -19,6 +20,8 @@ router.post("/create", user_ctrl.create_account);
 // router.post("/change", list_ctrl.edit_my_list);
 
 router.get('/home', page.home);
+router.get('/chart', page.chart);
+router.post('/info', page.info);
 router.get('/register', page.register);
 router.get('/forgot', page.forgot);
 router.get('/logout', page.logout);

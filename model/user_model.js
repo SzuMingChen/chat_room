@@ -108,4 +108,23 @@ exports.edit_account = async (new_value, user_account) => {
   }
 };
 
+//! 預設密碼
+exports.set_password = async (user_account, password_ans) => {
+  console.log('----進model---->', user_account);
+  const transaction = await mysql.getConnection();
+  try {
+    const update = `UPDATE user_account SET \`password\` = '${password_ans}', update_time = NOW()  WHERE (\`user_account\` = '${user_account}');`;
+    const [result] = await mysql.execute(update);
+    console.log("----model回---->", result);
+    await transaction.commit();
+    transaction.release();
+    if (!result) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
 

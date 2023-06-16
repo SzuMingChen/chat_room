@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>註冊</title>
+    <title>個人資訊</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,14 +55,17 @@
         }
     </style>
 </head>
+
 <body>
-    <h1><%= title %></h1>
-    <form action="/api/create" method="post">
-        <label for="nick_name">暱稱:</label>
-        <input type="text" id="nick_name" name="nick_name" required>
+    <h1>個人資訊</h1>
+    <form action="/api/edit" method="post">
+        <label for="nick_name">暱稱:<%= user_info.name %></label>
         <br>
-        <label for="user_account">帳號:</label>
-        <input type="text" id="user_account" name="user_account" required>
+        <label for="user_account" id="user_account" name="user_account" >帳號:</label>
+        <input type="text" id="user_account" name="user_account" value="<%= user_info.user_account %>" required>
+        <br>
+        <label for="old_password">舊密碼:</label>
+        <input type="password" id="old_password" name="old_password" required>
         <br>
         <label for="password">密碼:</label>
         <input type="password" id="password" name="password" required>
@@ -69,10 +73,13 @@
         <label for="check_password">確認密碼:</label>
         <input type="password" id="check_password" name="check_password" required>
         <br>
-        <button type="submit">註冊</button>
+        <button type="submit">修改</button>
     </form>
-    <form action="/api/home" method="get">
-        <button type="submit">回首頁</button>
+    <form action="/api/chart" method="get">
+        <button type="submit">回聊天室</button>
+    </form>
+    <form action="/api/logout" method="get">
+        <button type="submit">登出</button>
     </form>
 </body>
 </html>
