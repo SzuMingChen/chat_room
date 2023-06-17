@@ -1,34 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>忘記密碼</title>
     <style>
+        /* iPhone 13 mini, iPhone 13, iPhone 13 Pro, iPhone 14 mini, iPhone 14, iPhone 14 Pro */
+        @media only screen and (min-width: 360px) and (max-width: 780px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
+        /* iPhone 13 Pro Max, iPhone 14 Pro Max */
+        @media only screen and (min-width: 428px) and (max-width: 926px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
             margin: 0;
             padding: 0;
         }
-        
+
         h1 {
             text-align: center;
             margin-top: 50px;
         }
-        
+
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 50px;
         }
-        
+
         label {
             margin-bottom: 10px;
         }
-        
+
         input[type="text"] {
             padding: 8px;
             font-size: 16px;
@@ -36,7 +47,7 @@
             border: 1px solid #ccc;
             width: 250px;
         }
-        
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -47,14 +58,17 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        
+
         button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
+
 <body>
-    <h1><%= title %></h1>
+    <h1>
+        <%= title %>
+    </h1>
     <form action="/api/password" method="post">
         <label for="name">暱稱:</label>
         <input type="text" id="name" name="name" required>
@@ -64,8 +78,9 @@
         <br>
         <button type="submit">驗證</button>
     </form>
-    <form action="/api/home" method="get">
+    <form action="/" method="get">
         <button type="submit">回首頁</button>
     </form>
 </body>
+
 </html>

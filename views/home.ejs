@@ -1,34 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登入首頁</title>
     <style>
+        /* iPhone 13 mini, iPhone 13, iPhone 13 Pro, iPhone 14 mini, iPhone 14, iPhone 14 Pro */
+        @media only screen and (min-width: 360px) and (max-width: 780px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
+        /* iPhone 13 Pro Max, iPhone 14 Pro Max */
+        @media only screen and (min-width: 428px) and (max-width: 926px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
             margin: 0;
             padding: 0;
         }
-        
+
         h1 {
             text-align: center;
             margin-top: 50px;
         }
-        
+
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 50px;
         }
-        
+
         label {
             margin-bottom: 10px;
         }
-        
+
         input[type="text"],
         input[type="password"] {
             padding: 8px;
@@ -37,7 +48,7 @@
             border: 1px solid #ccc;
             width: 250px;
         }
-        
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -48,22 +59,25 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        
+
         button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
+
 <body>
-    <h1><%= title %></h1>
-    <form id="loginForm" action="/api/login" method="post" >
-      <label for="user_account">帳號:</label>
-      <input type="text" id="user_account" name="user_account" required>
-      <br>
-      <label for="password">密碼:</label>
-      <input type="password" id="password" name="password" required>
-      <br>
-      <button type="submit">登入</button>
+    <h1>
+        <%= title %>
+    </h1>
+    <form id="loginForm" action="/api/login" method="post">
+        <label for="user_account">帳號:</label>
+        <input type="text" id="user_account" name="user_account" required>
+        <br>
+        <label for="password">密碼:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">登入</button>
     </form>
     <form action="/api/register" method="get">
         <button type="submit">註冊</button>
@@ -72,4 +86,5 @@
         <button type="submit">忘記密碼</button>
     </form>
 </body>
+
 </html>

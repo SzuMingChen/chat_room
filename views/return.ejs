@@ -1,11 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
     <style>
+        /* iPhone 13 mini, iPhone 13, iPhone 13 Pro, iPhone 14 mini, iPhone 14, iPhone 14 Pro */
+        @media only screen and (min-width: 360px) and (max-width: 780px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
+        /* iPhone 13 Pro Max, iPhone 14 Pro Max */
+        @media only screen and (min-width: 428px) and (max-width: 926px) {
+            /* 修改元素大小、排列和顯示方式 */
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
@@ -16,18 +27,22 @@
             align-items: center;
             height: 100vh;
         }
-        
+
         h1 {
             text-align: center;
         }
     </style>
 </head>
+
 <body>
-    <h1><%= title %></h1>
+    <h1>
+        <%= title %>
+    </h1>
     <script>
         setTimeout(() => {
-           window.location.href = '/api/home';
-       }, 2000);
-   </script>
+            window.location.href = '/';
+        }, 2000);
+    </script>
 </body>
+
 </html>

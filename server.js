@@ -56,16 +56,16 @@ app.use((req, res, next) => {
 });
 
 // 外網連接用
-// app.get('/', (req, res) => {
-//   clog('首頁的session');
-//   console.log(req.session);
-//   res.render('home', { title: '首頁' });
-// });
+app.get('/', (req, res) => {
+  clog('首頁的session');
+  console.log(req.session);
+  res.render('home', { title: '首頁' });
+});
 
 // router
 app.use('/api', router)
 
 
 server.listen(port, () => {
-  clog(`伺服器運行::http://localhost:${port}/api/home`);
+  clog(`伺服器運行::http://localhost:${port}/`);
 });

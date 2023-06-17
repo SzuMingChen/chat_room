@@ -181,5 +181,5 @@ exports.logout = async (req, res) => {
   console.log('@@@@@', req.session);
   // 清除session
   req.session.destroy();
-  return res.redirect('/api/home');
+  return res.redirect('/');
 };

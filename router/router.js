@@ -19,7 +19,7 @@ router.post('/logout', user_ctrl.logout);
 // router.post("/change", list_ctrl.edit_my_list);
 
 router.post('/info', page.info);
-router.get('/home', page.home);
+// router.get('/home', page.home);
 router.get('/chart', page.chart);
 router.get('/register', page.register);
 router.get('/forgot', page.forgot);
