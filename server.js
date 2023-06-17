@@ -11,6 +11,18 @@ const { clog } = require('./config/utils');
 const router = require('./router/router');
 const port = 3000;
 
+// socket io
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",//! 允許來源，也可以為網域 "*"為允許所有來源 
+    method: ["GET", "POST"],//! 設置只允許這兩種請求方式
+    credentials: true //! 可允許攜帶身分憑證 ex:cookie
+  }
+});
+// 引入socket.js文件 並啟動
+const socket = require('./controller/user_ctrl');
+socket.connect(io);
+
 //* 啟動ejs
 const engine = require("ejs-locals");
 app.engine("ejs", engine);
@@ -21,17 +33,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-// socket io
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",//! 允許來源，也可以為網域 "*"為允許所有來源 
-    method: ["GET", "POST"],//! 設置只允許這兩種請求方式
-    credentials: true //! 可允許攜帶身分憑證 ex:cookie
-  }
-});
-
-// 引入socket.js文件 並啟動
-const socket = require('./socket.io/socket.io')(io);
 
 // session
 app.use(session({
@@ -53,6 +54,13 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// 外網連接用
+// app.get('/', (req, res) => {
+//   clog('首頁的session');
+//   console.log(req.session);
+//   res.render('home', { title: '首頁' });
+// });
 
 // router
 app.use('/api', router)

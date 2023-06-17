@@ -12,16 +12,15 @@ router.post("/login", user_ctrl.login_account);
 router.post("/create", user_ctrl.create_account);
 router.post('/password', user_ctrl.set_password)
 router.post("/edit", user_ctrl.edit_account);
+router.post('/logout', user_ctrl.logout);
 
 //* chart_room
-// router.get("/todo_list", list_ctrl.home);
-// router.post("/write", list_ctrl.write_new_list);
 // router.post("/remove", list_ctrl.remove_my_list);
 // router.post("/change", list_ctrl.edit_my_list);
 
+router.post('/info', page.info);
 router.get('/home', page.home);
 router.get('/chart', page.chart);
-router.post('/info', page.info);
 router.get('/register', page.register);
 router.get('/forgot', page.forgot);
-router.get('/logout', page.logout);
+

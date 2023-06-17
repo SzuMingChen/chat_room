@@ -47,6 +47,7 @@
 
 <body>
     <h2>聊天室</h2>
+    <span id="connected-clients"></span>
     <div id="chat"></div>
     <input type="text" id="messageInput" placeholder="輸入訊息">
     <button id="sendButton">Send</button>
@@ -54,7 +55,7 @@
     <form action="/api/info" method="post">
         <button type="submit">個人資訊</button>
     </form>
-    <form action="/api/logout" method="get">
+    <form action="/api/logout" method="post">
         <button type="submit">登出</button>
     </form>
 </body>
@@ -65,23 +66,51 @@
     // 連接至 Socket.IO 伺服器 全域使用
     const socket = io();
 
-    // 使用者資訊
-    const userInfo = '<%= user_info %>';
+    //-----------------------------------------------------------------------------------------
+
+    // 更新在線人數
+    function updateOnlineUsers() {
+        socket.emit('get connected clients');
+    }
+    // 初始化時先更新一次在線人數
+    updateOnlineUsers();
+    // 定期更新在線人數
+    setInterval(updateOnlineUsers, 1000); // 每秒更新一次
+
+
+    // 處理 connected clients 事件
+    socket.on('connected clients', (connectedClients) => {
+        // 在這裡進行對 connectedClients 的處理，例如更新頁面上的連線人數顯示等等
+        const connectedClientsElement = document.getElementById('connected-clients');
+        connectedClientsElement.innerHTML = `目前連線人數：${connectedClients} 人`;
+    });
+
+    //------------------------------------------------------------------------------------------
 
     // 取得元素
     const chatDiv = document.getElementById('chat');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
 
+    // 使用者資訊
+    const userInfo = '<%= user_info %>';
     // 發送訊息
     function sendMessage() {
-        const message = `${userInfo}：${messageInput.value}` ;
+        const message = `${userInfo}：${messageInput.value}`;
 
         if (message) {
             socket.emit('chat message', message); // 發送 'chat message' 事件到伺服器
             messageInput.value = ''; // 清空輸入框
         }
     }
+    // 當按下送出按鈕時發送訊息
+    sendButton.addEventListener('click', sendMessage);
+    // 當按下 Enter 鍵時發送訊息
+    messageInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
 
     // 監聽 'chat message' 事件，接收伺服器傳來的訊息
     socket.on('chat message', (message) => {
@@ -91,13 +120,44 @@
         chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
     });
 
-    // 當按下送出按鈕時發送訊息
-    sendButton.addEventListener('click', sendMessage);
 
-    // 當按下 Enter 鍵時發送訊息
-    messageInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            sendMessage();
+    //------------------------------------------------------------------------------------------------
+    // 處理 user joined 事件
+    socket.on('user joined', (role) => {
+        // 在這裡進行對角色加入聊天室的處理，例如更新頁面上的狀態顯示等等
+        const messageElement = document.createElement('div');
+        messageElement.innerText = `${role} 已加入聊天室`;
+        messageElement.style.color = 'blue'; // 改變顏色
+        chatDiv.appendChild(messageElement);
+        chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
+    });
+    // 處理 user left 事件
+    socket.on('user left', (role) => {
+        // 在這裡進行對角色離開聊天室的處理，例如更新頁面上的狀態顯示等等
+        const messageElement = document.createElement('div');
+        messageElement.innerText = `${role} 已離開聊天室`;
+        messageElement.style.color = 'blue'; // 改變顏色
+        chatDiv.appendChild(messageElement);
+        chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
+    });
+
+    // 創建一個已印出的歷史紀錄列表
+    const printedHistory = [];
+    // 處理歷史紀錄事件
+    socket.on('user-body', (body) => {
+        for (let i = 0; i < body.length; i++) {
+            const key = body[i];
+            // 檢查該項目是否已印出，若已印出則跳過
+            if (printedHistory.includes(key)) {
+                continue;
+            }
+            const element = document.createElement('div');
+            element.innerText = key;
+            chatDiv.appendChild(element);
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // 將該項目加入已印出的歷史紀錄列表
+            printedHistory.push(key);
         }
     });
 </script>

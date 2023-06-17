@@ -69,24 +69,6 @@ exports.create_account = async (user_account, password, name) => {
   }
 };
 
-//! 刪
-exports.close_account = async (user_account) => {
-  console.log('----進model---->', user_account);
-  const transaction = await mysql.getConnection();
-  try {
-    const target = `UPDATE user_account SET status = 0, update_time = NOW()  WHERE (user_account = '${user_account}');`;
-    const [result] = await mysql.execute(target);
-    console.log("----model回---->", result);
-    if (result.changedRows !== 0) {
-      return true;
-    }
-    await transaction.commit();
-    transaction.release();
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
-  }
-};
 
 //! 改
 exports.edit_account = async (new_value, user_account) => {
