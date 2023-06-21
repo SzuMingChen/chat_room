@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const user_ctrl = require("../controller/user_ctrl");
 // const list_ctrl = require('../controller/list_ctrl');
-const page = require('./page');
+const page = require('../controller/page');
 
 
 module.exports =

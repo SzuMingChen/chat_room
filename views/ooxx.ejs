@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOXX Game</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 10px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      background-color: #eee;
+      cursor: pointer;
+      width: 100px;
+      height: 100px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .cell:hover {
+      background-color: #ddd;
+    }
+
+    #result-message {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 24px;
+      color: #333;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>
+    遊戲室
+  </h1>
+  <div id="message-container"></div>
+  <div id="game-board">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <div id="result-message"></div>
+  <button id="restart">重新開始</button>
+
+  <form action="/api/chart" method="get">
+    <button type="submit">回聊天室</button>
+  </form>
+  <form action="/api/logout" method="post">
+    <button type="submit">登出</button>
+  </form>
+  <!-- 需引入io至客戶端使用 -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // 使用者資訊
+    const userInfo = '<%= user_info %>';
+    document.addEventListener('DOMContentLoaded', () => {
+      const cells = Array.from(document.getElementsByClassName('cell'));
+      const resultMessage = document.getElementById('result-message');
+
+      // 處理 user joined 事件
+      socket.on('game joined', (role) => {
+        const messageContainer = document.getElementById('message-container');
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `${role} 已加入遊戲`;
+        messageElement.style.color = 'blue';
+        messageContainer.appendChild(messageElement);
+        // 設定兩秒後元素消失
+        setTimeout(() => {
+          messageElement.remove();
+        }, 2000);
+      });
+      // 處理 user left 事件
+      socket.on('game left', (role) => {
+        const messageContainer = document.getElementById('message-container');
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `${role} 已離開遊戲`;
+        messageElement.style.color = 'blue';
+        messageContainer.appendChild(messageElement);
+        // 設定兩秒後元素消失
+        setTimeout(() => {
+          messageElement.remove();
+        }, 2000);
+      });
+
+      let playerId;
+      let isPlayerTurn = false;
+      let gameOver = false;
+
+
+
+      // 接收玩家id
+      socket.on('playerId', (id) => {
+        playerId = id;
+      });
+
+      // 玩家連接被拒绝
+      socket.on('connectionRejected', () => {
+        alert('已有兩名玩家連線，請稍後!。');
+      });
+
+      // 遊戲開始
+      socket.on('gameStart', () => {
+        isPlayerTurn = playerId === 1;
+        updateTurnMessage();
+      });
+
+      // 玩家下棋
+      socket.on('moveMade', (data) => {
+        const { index, symbol } = data;
+        cells[index].textContent = symbol;
+        cells[index].style.cursor = 'default';
+        isPlayerTurn = playerId !== -1 && !gameOver && symbol !== '';
+        updateTurnMessage();
+      });
+
+      // 遊戲結束
+      socket.on('gameOver', (winner) => {
+        gameOver = true;
+        if (winner === 0) {
+          resultMessage.textContent = '平局！';
+        } else if (winner === playerId) {
+          resultMessage.textContent = '你赢了！';
+        } else {
+          resultMessage.textContent = '你輸了！';
+        }
+      });
+
+      // 換下回合
+      socket.on('nextTurn', (nextPlayer) => {
+        isPlayerTurn = playerId === nextPlayer;
+        updateTurnMessage();
+      });
+
+      // 處理重新開始按鈕點擊事件
+      const restartButton = document.getElementById('restart');
+      restartButton.addEventListener('click', () => {
+        const shouldRestart = confirm('確定要重新開始新的棋局？');
+        if (shouldRestart) {
+          socket.emit('restartGame');
+          resetGame();
+        }
+      });
+
+      // 點擊下棋
+      cells.forEach((cell, index) => {
+        cell.addEventListener('click', () => {
+          if (isPlayerTurn && !gameOver && cell.textContent === '') {
+            socket.emit('makeMove', index);
+          }
+        });
+      });
+
+      // 更新玩家回合提示
+      function updateTurnMessage() {
+        const message = isPlayerTurn ? '輪到你了' : '等待對手';
+        resultMessage.textContent = message;
+      }
+
+      // 重置遊戲
+      function resetGame() {
+        cells.forEach((cell) => {
+          cell.textContent = '';
+          cell.style.cursor = 'pointer';
+        });
+        resultMessage.textContent = '';
+        gameOver = false;
+        isPlayerTurn = playerId !== -1;
+        updateTurnMessage();
+      }
+    });
+  </script>
+</body>
+
+</html>

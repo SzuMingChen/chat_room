@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document</title>
+  <style>
+    h2 {
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+    }
+
+    /* 聊天室樣式 */
+    #chat-room {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 10px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+      /* 限制最大寬度 */
+    }
+
+    #chat {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    #messageInput {
+      width: 70%;
+      padding: 5px;
+      font-size: 16px;
+      float: left;
+    }
+
+    #sendButton {
+      padding: 5px 10px;
+      font-size: 16px;
+      float: right;
+    }
+
+    /* 遊戲室樣式 */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 100px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      cursor: pointer;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    .restart-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* 優化版面樣式 - iPhone 13 mini, iPhone 13, iPhone 13 Pro, iPhone 14 mini, iPhone 14, iPhone 14 Pro */
+    @media only screen and (min-width: 360px) and (max-width: 780px) {
+      body {
+        flex-direction: column;
+      }
+
+      #chat-room {
+        margin-bottom: 20px;
+      }
+
+      .container {
+        margin-top: 0;
+      }
+
+      .board {
+        grid-template-columns: repeat(3, 80px);
+        gap: 8px;
+      }
+
+      .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 40px;
+      }
+
+      .message {
+        font-size: 20px;
+      }
+
+      .restart-button {
+        padding: 8px 16px;
+        font-size: 16px;
+      }
+    }
+
+    /* 優化版面樣式 - iPhone 13 Pro Max, iPhone 14 Pro Max */
+    @media only screen and (min-width: 428px) and (max-width: 926px) {
+      body {
+        flex-direction: column;
+      }
+
+      #chat-room {
+        margin-bottom: 20px;
+      }
+
+      .container {
+        margin-top: 0;
+      }
+
+      .board {
+        grid-template-columns: repeat(3, 120px);
+        gap: 12px;
+      }
+
+      .cell {
+        width: 120px;
+        height: 120px;
+        font-size: 56px;
+      }
+
+      .message {
+        font-size: 28px;
+      }
+
+      .restart-button {
+        padding: 12px 24px;
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="chat-room">
+    <h3>聊天室</h3>
+    <span id="connected-clients"></span>
+    <div id="chat"></div>
+    <input type="text" id="messageInput" placeholder="輸入訊息">
+    <button id="sendButton">Send</button>
+
+    <form action="/api/info" method="post">
+      <button type="submit">個人資訊</button>
+    </form>
+
+    <form action="/api/logout" method="post">
+      <button type="submit">登出</button>
+    </form>
+  </div>
+
+  <div class="container">
+    <h3>井字遊戲</h3>
+    <div class="board">
+      <div class="cell" data-row="0" data-col="0"></div>
+      <div class="cell" data-row="0" data-col="1"></div>
+      <div class="cell" data-row="0" data-col="2"></div>
+      <div class="cell" data-row="1" data-col="0"></div>
+      <div class="cell" data-row="1" data-col="1"></div>
+      <div class="cell" data-row="1" data-col="2"></div>
+      <div class="cell" data-row="2" data-col="0"></div>
+      <div class="cell" data-row="2" data-col="1"></div>
+      <div class="cell" data-row="2" data-col="2"></div>
+    </div>
+    <div class="message"></div>
+    <button class="restart-button">重新開始</button>
+  </div>
+
+
+
+</body>
+<!-- 需引入io至客戶端使用 -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+  // 連接至 Socket.IO 伺服器 全域使用
+  const socket = io();
+
+  //-----------------------------------------------------------------------------------------
+
+
+  // 更新在線人數
+  function updateOnlineUsers() {
+    socket.emit('get connected clients');
+  }
+  // 初始化時先更新一次在線人數
+  updateOnlineUsers();
+  // 定期更新在線人數
+  setInterval(updateOnlineUsers, 1000); // 每秒更新一次
+
+  // 處理 connected clients 事件
+  socket.on('connected clients', (connectedClients) => {
+    // 在這裡進行對 connectedClients 的處理，例如更新頁面上的連線人數顯示等等
+    const connectedClientsElement = document.getElementById('connected-clients');
+    connectedClientsElement.innerHTML = `目前連線人數：${connectedClients} 人`;
+  });
+
+  //------------------------------------------------------------------------------------------
+
+  // 取得元素
+  const chatDiv = document.getElementById('chat');
+  const messageInput = document.getElementById('messageInput');
+  const sendButton = document.getElementById('sendButton');
+
+  // 使用者資訊
+  const userInfo = '<%= user_info %>';
+  // 發送訊息
+  function sendMessage() {
+    const message = `${userInfo}：${messageInput.value}`;
+
+    if (message) {
+      socket.emit('chat message', message); // 發送 'chat message' 事件到伺服器
+      messageInput.value = ''; // 清空輸入框
+    }
+  }
+  // 當按下送出按鈕時發送訊息
+  sendButton.addEventListener('click', sendMessage);
+  // 當按下 Enter 鍵時發送訊息
+  messageInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  // 監聽 'chat message' 事件，接收伺服器傳來的訊息
+  socket.on('chat message', (message) => {
+    const messageElement = document.createElement('p');
+    messageElement.innerText = message;
+    chatDiv.appendChild(messageElement);
+    chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
+  });
+
+  //------------------------------------------------------------------------------------------------
+
+  // 處理 user joined 事件
+  socket.on('user joined', (role) => {
+    // 在這裡進行對角色加入聊天室的處理，例如更新頁面上的狀態顯示等等
+    const messageElement = document.createElement('div');
+    messageElement.innerText = `${role} 加入遊戲`;
+    messageElement.style.color = 'blue'; // 改變顏色
+    chatDiv.appendChild(messageElement);
+    chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
+  });
+  // 處理 user left 事件
+  socket.on('user left', (role) => {
+    // 在這裡進行對角色離開聊天室的處理，例如更新頁面上的狀態顯示等等
+    const messageElement = document.createElement('div');
+    messageElement.innerText = `${role} 離開遊戲`;
+    messageElement.style.color = 'blue'; // 改變顏色
+    chatDiv.appendChild(messageElement);
+    chatDiv.scrollTop = chatDiv.scrollHeight; // 捲動至最底部
+  });
+
+  // 創建一個已印出的歷史紀錄列表
+  const printedHistory = [];
+  // 處理歷史紀錄事件
+  socket.on('user-body', (body) => {
+    for (let i = 0; i < body.length; i++) {
+      const key = body[i];
+      // 檢查該項目是否已印出，若已印出則跳過
+      if (printedHistory.includes(key)) {
+        continue;
+      }
+      const element = document.createElement('div');
+      element.innerText = key;
+      chatDiv.appendChild(element);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+
+      // 將該項目加入已印出的歷史紀錄列表
+      printedHistory.push(key);
+    }
+  });
+
+  //------------------------------------------------------------------------------------------------
+
+  // game
+
+  const cells = document.querySelectorAll('.cell');
+  const message = document.querySelector('.message');
+  const restartButton = document.querySelector('.restart-button');
+
+  cells.forEach((cell) => {
+    cell.addEventListener('click', () => {
+      const row = cell.dataset.row;
+      const col = cell.dataset.col;
+
+      socket.emit('move', { row, col });
+    });
+  });
+
+  restartButton.addEventListener('click', () => {
+    socket.emit('restart');
+  });
+
+  socket.on('gameState', (gameState) => {
+    updateGameState(gameState);
+  });
+
+  socket.on('move', (move) => {
+    const { row, col, player } = move;
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    cell.textContent = player;
+  });
+
+  socket.on('message', (messageText) => {
+    showMessage(messageText);
+  });
+
+  socket.on('restart', () => {
+    resetBoard();
+  });
+
+  function updateGameState(gameState) {
+    cells.forEach((cell, index) => {
+      const row = Math.floor(index / 3);
+      const col = index % 3;
+      cell.textContent = gameState[row][col];
+    });
+  }
+
+  function showMessage(messageText) {
+    message.textContent = messageText;
+  }
+
+  function resetBoard() {
+    cells.forEach((cell) => {
+      cell.textContent = '';
+    });
+    showMessage('');
+  }
+</script>
+
+</html>
